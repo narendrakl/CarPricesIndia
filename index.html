@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Car Prices In India</title>
+		<link href='bootstrap.css' rel='stylesheet' type='text/css'>
+		<link href='mystyle.css' rel='stylesheet'>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsjgMjfdIj2CqC2yxaaMRmhf6FG3AXZmE"></script>
+		<script type="text/javascript">
+			var xhr = new XMLHttpRequest();
+			var data_api='d3534983a464b38b670843d1b1fcd085bc954460';
+			var infowindow = new google.maps.InfoWindow();
+			var myLatLng;
+			var mapOpts;
+			var map;
+			//Google map initializes here based on latitude and longitude. 
+			function initialize(){
+				mapOpts = {
+					center: {lat:21.00, lng:72.00},
+					zoom:5,
+					scrollwheel:false,
+					draggable: true
+				};
+				map = new google.maps.Map(document.getElementById('map-container'), mapOpts);
+				setMarker(map, metropolitans);
+				console.log(metropolitans[0]);
+			}
+			var metropolitans = [
+				['Bangalore', 12.9667, 77.5667, 1],
+				['Chennai', 13.0839, 80.2700, 2],
+				['Hyderabad', 17.3660, 78.4760, 3],
+				['Kolkata', 22.5667, 88.3667, 4],
+				['Delhi', 28.6110, 77.2300, 5],
+				['Mumbai', 18.9750, 72.8258, 6],
+				['Ahmedabad', 23.0300, 72.5800, 7]
+			];
+			//Markers on the map displayed here.
+			function setMarker(map, metropolitans){
+					console.log("Marker function working properly");
+					for(var i=0; i<metropolitans.length; i++){
+						var cities = metropolitans[i];
+						myLatLng = new google.maps.LatLng(cities[1], cities[2]);
+						map_marker = new google.maps.Marker({
+								position: myLatLng,
+								map: map,
+								draggable: false,
+								title: cities[0],
+								zIndex: cities[3]
+						});
+						console.log("No of markers");
+					}
+			}
+			//function to fetch data of the cars based on locations.
+			function make_model(){
+				var model = document.getElementById("make").value;
+				var loc = document.getElementById("location").value;
+				if(model==='null' || loc==='null')
+				{
+					alert("Not selected anything");
+					return false;
+				}
+				else
+				{	
+					xhr.onreadystatechange=function(){
+						if(xhr.readyState==4 && xhr.status==200){
+							
+							var myArr = JSON.parse(xhr.responseText);
+							if(myArr.data!='')
+							{
+								var content_data = '<div id="content">'+'<b>TYPE:</b>'+myArr.data[1].variant+'</br>'+'<b>PRICE:</b>'+myArr.data[1].price+' '+'INR';
+								infowindow.setContent(content_data);
+								for(var j=0;j<metropolitans.length;j++)
+								{
+									var city = metropolitans[j];
+									if(loc === city[0])
+									{
+										myLatLng = new google.maps.LatLng(city[1]+1.5, city[2]);
+										console.log(city[1]+" "+city[2]);
+										infowindow.setPosition(myLatLng);
+										infowindow.open(map);
+										break;
+									}
+								}
+								//document.getElementById("data").innerHTML = myArr.data[2].price;
+								console.log(myArr.data[2].price);
+							}
+							else{
+								alert("Data not available");
+								return false;
+							}
+						}
+					}
+					
+					xhr.open("GET", 'http://api.dataweave.in/v1/carPricesIndia/findByMake/?api_key='+data_api+'&make='+model+'&city='+loc, true);
+					xhr.send();
+				}
+			}
+			function isInfoWindowOpen(infowindow){
+				map = infowindow.getMap();
+				return (map!=null && typeof map!= "undefined");
+			}
+			google.maps.event.addDomListener(window, 'load', initialize);
+		</script>
+		
+	</head>
+	<body>
+		<div class="nav navbar"></div>
+		<div class="container">
+			<div id="map-container"></div>
+			<div id="form_back">
+				<form role="form">
+				<table class="table">
+					<div class="form-group">
+							<tr><th>Make:</th>
+							<td><select id="make" class="form-control">
+							<option value="null">--Choose--</option>
+							<option value="Chevrolet">Chevrolet</option>
+							<option value="Maruti">Maruti</option>
+							</select></td></tr>
+							<tr><th>City:</th>
+							<td><select id="location" class="form-control">
+							<option value="null">--Choose--</option>
+							<option value="Bangalore">Bengaluru</option>
+							<option value="Chennai">Chennai</option>
+							<option value="Kolkata">Kolkata</option>
+							<option value="Delhi">Delhi</option>
+							<option value="Mumbai">Mumbai</option>
+							<option value="Ahmedabad">Ahmedabad</option>
+							<option value="Hyderabad">Hyderabad</option>
+							</select></td></tr>
+							<td><button type="button" class="btn btn-primary" onclick="make_model()">Submit</button></td>
+					</div>
+				</table>
+				</form>	
+			</div>
+		</div>
+		<div id="data"></div>
+	</body>
+</html>

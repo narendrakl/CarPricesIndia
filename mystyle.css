@@ -1,0 +1,16 @@
+#map-container{
+	
+	height:600px;
+}
+#form_back{
+	height:300px;
+	width:250px;
+	background-color:#fafafa;
+	position: absolute;
+	top:150px;
+	left:280px;
+	z-index:99;
+}
+#content{
+	height: 50px;
+}
